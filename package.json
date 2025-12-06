@@ -1,0 +1,23 @@
+{
+  "name": "obsidian-nextcloud-bridge",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "build": "node esbuild.config.mjs production",
+    "dev": "node esbuild.config.mjs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "builtin-modules": "^5.0.0",
+    "esbuild": "^0.27.1",
+    "esbuild-svelte": "^0.9.3",
+    "obsidian": "^1.10.3",
+    "svelte": "^5.45.6",
+    "tslib": "^2.8.1",
+    "typescript": "^5.9.3",
+    "webdav": "^5.8.0"
+  }
+}

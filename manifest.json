@@ -1,0 +1,10 @@
+{
+    "id": "obsidian-nextcloud-bridge",
+    "name": "Nextcloud Bridge",
+    "version": "1.0.0",
+    "minAppVersion": "0.15.0",
+    "description": "Connects to Nextcloud via WebDAV to list files.",
+    "author": "Antigravity",
+    "authorUrl": "https://github.com/mkshp-dev",
+    "isDesktopOnly": false
+}

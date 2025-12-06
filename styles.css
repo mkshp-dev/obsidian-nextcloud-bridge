@@ -1,0 +1,7 @@
+/* Default styles for nextcloud plugin */
+
+.nextcloud-no-bullets {
+    list-style-type: none !important;
+    padding-left: 0 !important;
+    margin-left: 0 !important;
+}
