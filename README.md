@@ -29,9 +29,79 @@ For security, it is highly recommended to use an **App Password** instead of you
 
 Use the `nextcloud` code block to list files from a specific folder.
 
+### Basic Example
 ```nextcloud
-command; List Files
+command: List Files
 folder: /Documents/ProjectX
 ```
 
-- `folder`: The path to the folder in your Nextcloud (start with `/`). Defaults to root `/` if omitted.
+### Advanced Features
+
+#### Filtering
+You can filter files by extension.
+```nextcloud
+command: List Files
+folder: /Photos
+filter:
+    - extension: jpg, png
+```
+
+#### Custom Formatting
+Customize how each file entry is displayed using placeholders.
+- `{{name}}`: Full filename (e.g., `image.jpg`)
+- `{{filename}}`: Filename without extension (e.g., `image`)
+- `{{ext}}`: File extension (e.g., `jpg`)
+
+```nextcloud
+command: List Files
+folder: /Books
+format: 📘 {{filename}}
+```
+
+#### UI Customization
+Remove bullet points for a cleaner look.
+```nextcloud
+command: List Files
+folder: /Notes
+list-style: none
+```
+
+### Combined Example
+```nextcloud
+command: List Files
+folder: /Documents
+filter:
+    - extension: pdf
+format: 📄 {{filename}}
+list-style: none
+```
+
+## Developer API
+
+This plugin exposes a public API that other plugins can use to fetch files from Nextcloud.
+
+### `runQuery(queryText: string): Promise<string[]>`
+
+Executes a Nextcloud query string (same format as the code block) and returns an array of formatted strings.
+
+**Example Usage:**
+
+```typescript
+const plugin = this.app.plugins.plugins["obsidian-nextcloud-bridge"];
+
+if (plugin && plugin.api) {
+    try {
+        const results = await plugin.api.runQuery(`
+            command: List Files
+            folder: /Photos
+            filter:
+                - extension: jpg
+            format: {{filename}}
+        `);
+        
+        console.log("Fetched files:", results);
+    } catch (error) {
+        console.error("Query failed:", error);
+    }
+}
+```
