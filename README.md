@@ -50,8 +50,8 @@ Filter files using various criteria:
 - `maxsize`: Maximum file size in bytes
 
 **Date filters:**
-- `modifiedafter`: Show files modified after a specific date (ISO format: `YYYY-MM-DD`)
-- `modifiedbefore`: Show files modified before a specific date (ISO format: `YYYY-MM-DD`)
+- `modifiedafter`: Show files modified after a specific date/time (ISO format: `YYYY-MM-DD` or `YYYY-MM-DDTHH:mm:ss`)
+- `modifiedbefore`: Show files modified before a specific date/time (ISO format: `YYYY-MM-DD` or `YYYY-MM-DDTHH:mm:ss`)
 
 **Metadata filters:**
 - `favorite`: Filter by favorite status (`true` or `1` for favorites only)
@@ -86,6 +86,15 @@ folder: /Projects
 filter:
     - favorite: true
     - modifiedafter: 2024-01-01
+```
+
+Filter by date with time:
+```nextcloud
+command: List Files
+folder: /Documents
+filter:
+    - modifiedafter: 2024-12-10T09:00:00
+    - modifiedbefore: 2024-12-10T17:00:00
 ```
 
 Filter by tags and MIME type:
