@@ -75,6 +75,60 @@ export default class NextcloudPlugin extends Plugin {
         return params;
     }
 
+    parseRelativeDate(dateString: string): Date {
+        const trimmed = dateString.trim();
+        
+        // Check for "now" keyword
+        if (trimmed.toLowerCase() === 'now') {
+            return new Date();
+        }
+        
+        // Check for arithmetic expressions: "now - 10 days" or "2025-10-10 + 5 hours"
+        const arithmeticMatch = trimmed.match(/^(.+?)\s*([+-])\s*(\d+)\s*(second|minute|hour|day|week|month|year)s?$/i);
+        if (arithmeticMatch) {
+            const [, baseDateStr, operator, amount, unit] = arithmeticMatch;
+            const value = parseInt(amount);
+            const multiplier = operator === '+' ? 1 : -1;
+            
+            // Parse base date (could be "now" or an absolute date)
+            let baseDate: Date;
+            if (baseDateStr.trim().toLowerCase() === 'now') {
+                baseDate = new Date();
+            } else {
+                baseDate = new Date(baseDateStr.trim());
+            }
+            
+            // Apply the arithmetic operation
+            switch (unit.toLowerCase()) {
+                case 'second':
+                    baseDate.setSeconds(baseDate.getSeconds() + (value * multiplier));
+                    break;
+                case 'minute':
+                    baseDate.setMinutes(baseDate.getMinutes() + (value * multiplier));
+                    break;
+                case 'hour':
+                    baseDate.setHours(baseDate.getHours() + (value * multiplier));
+                    break;
+                case 'day':
+                    baseDate.setDate(baseDate.getDate() + (value * multiplier));
+                    break;
+                case 'week':
+                    baseDate.setDate(baseDate.getDate() + (value * 7 * multiplier));
+                    break;
+                case 'month':
+                    baseDate.setMonth(baseDate.getMonth() + (value * multiplier));
+                    break;
+                case 'year':
+                    baseDate.setFullYear(baseDate.getFullYear() + (value * multiplier));
+                    break;
+            }
+            return baseDate;
+        }
+        
+        // Fall back to standard date parsing for absolute dates
+        return new Date(trimmed);
+    }
+
     async runQuery(queryText: string): Promise<string[]> {
         const params = this.parseQuery(queryText);
         if (params['command'] !== 'List Files') {
@@ -285,7 +339,7 @@ export default class NextcloudPlugin extends Plugin {
                             const fileDate = new Date(lastModified);
                             
                             if (filter.modifiedafter) {
-                                const afterDate = new Date(filter.modifiedafter);
+                                const afterDate = this.parseRelativeDate(filter.modifiedafter);
                                 if (fileDate <= afterDate) {
                                     match = false;
                                     break;
@@ -293,7 +347,7 @@ export default class NextcloudPlugin extends Plugin {
                             }
                             
                             if (filter.modifiedbefore) {
-                                const beforeDate = new Date(filter.modifiedbefore);
+                                const beforeDate = this.parseRelativeDate(filter.modifiedbefore);
                                 if (fileDate >= beforeDate) {
                                     match = false;
                                     break;

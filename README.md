@@ -50,8 +50,12 @@ Filter files using various criteria:
 - `maxsize`: Maximum file size in bytes
 
 **Date filters:**
-- `modifiedafter`: Show files modified after a specific date/time (ISO format: `YYYY-MM-DD` or `YYYY-MM-DDTHH:mm:ss`)
-- `modifiedbefore`: Show files modified before a specific date/time (ISO format: `YYYY-MM-DD` or `YYYY-MM-DDTHH:mm:ss`)
+- `modifiedafter`: Show files modified after a specific date/time
+  - Absolute: `YYYY-MM-DD` or `YYYY-MM-DDTHH:mm:ss`
+  - Relative: `now`, `now - 10 days`, `now + 2 hours`
+  - Date arithmetic: `2025-10-10 - 10 days`, `2025-12-01T09:00:00 + 5 hours`
+  - Supported units: `second`, `minute`, `hour`, `day`, `week`, `month`, `year` (singular or plural)
+- `modifiedbefore`: Show files modified before a specific date/time (same formats as `modifiedafter`)
 
 **Metadata filters:**
 - `favorite`: Filter by favorite status (`true` or `1` for favorites only)
@@ -95,6 +99,33 @@ folder: /Documents
 filter:
     - modifiedafter: 2024-12-10T09:00:00
     - modifiedbefore: 2024-12-10T17:00:00
+```
+
+Filter by relative dates (files from last 10 days):
+```nextcloud
+command: List Files
+folder: /Documents
+filter:
+    - modifiedafter: now - 10 days
+```
+
+Filter by recent files (last 2 hours):
+```nextcloud
+command: List Files
+folder: /Work
+filter:
+    - modifiedafter: now - 2 hours
+    - type: file
+format: 🕐 {{name}} - {{datetime}}
+```
+
+Filter using date arithmetic on absolute dates:
+```nextcloud
+command: List Files
+folder: /Archive
+filter:
+    - modifiedafter: 2025-10-10 - 10 days
+    - modifiedbefore: 2025-10-10 + 5 days
 ```
 
 Filter by tags and MIME type:
