@@ -38,7 +38,30 @@ folder: /Documents/ProjectX
 ### Advanced Features
 
 #### Filtering
-You can filter files by extension.
+Filter files using various criteria:
+
+**File type filters:**
+- `extension`: Filter by file extensions (comma-separated)
+- `type`: Filter by resource type (`file` or `folder`)
+- `mimetype`: Filter by MIME type (comma-separated, e.g., `image/jpeg, image/png`)
+
+**Size filters:**
+- `minsize`: Minimum file size in bytes
+- `maxsize`: Maximum file size in bytes
+
+**Date filters:**
+- `modifiedafter`: Show files modified after a specific date (ISO format: `YYYY-MM-DD`)
+- `modifiedbefore`: Show files modified before a specific date (ISO format: `YYYY-MM-DD`)
+
+**Metadata filters:**
+- `favorite`: Filter by favorite status (`true` or `1` for favorites only)
+- `tag`: Filter by tags (comma-separated, matches any tag containing the filter text)
+- `owner`: Filter by owner display name (partial match, case-insensitive)
+- `haspreview`: Filter by preview availability (`true` or `1`)
+
+**Examples:**
+
+Filter by extension:
 ```nextcloud
 command: List Files
 folder: /Photos
@@ -46,16 +69,66 @@ filter:
     - extension: jpg, png
 ```
 
+Filter by size and type:
+```nextcloud
+command: List Files
+folder: /Documents
+filter:
+    - type: file
+    - minsize: 1000000
+    - maxsize: 10000000
+```
+
+Filter by date and favorite status:
+```nextcloud
+command: List Files
+folder: /Projects
+filter:
+    - favorite: true
+    - modifiedafter: 2024-01-01
+```
+
+Filter by tags and MIME type:
+```nextcloud
+command: List Files
+folder: /Media
+filter:
+    - tag: work, important
+    - mimetype: image/jpeg, image/png
+```
+
 #### Custom Formatting
 Customize how each file entry is displayed using placeholders.
+
+**Basic placeholders:**
 - `{{name}}`: Full filename (e.g., `image.jpg`)
 - `{{filename}}`: Filename without extension (e.g., `image`)
 - `{{ext}}`: File extension (e.g., `jpg`)
 
+**File metadata:**
+- `{{size}}`: File size in bytes
+- `{{sizekb}}`: File size in kilobytes (formatted with 2 decimals)
+- `{{sizemb}}`: File size in megabytes (formatted with 2 decimals)
+- `{{type}}`: Resource type (`file` or `folder`)
+- `{{mimetype}}`: MIME type (e.g., `image/jpeg`, `application/pdf`)
+
+**Date and time:**
+- `{{date}}`: Last modified date (localized short format)
+- `{{datetime}}`: Last modified date and time (localized format)
+- `{{modified}}`: Raw last modified timestamp
+- `{{created}}`: Creation date timestamp
+
+**Additional metadata:**
+- `{{favorite}}`: Shows ⭐ if file is marked as favorite, empty otherwise
+- `{{tags}}`: Comma-separated list of tags
+- `{{owner}}`: Display name of the file owner
+- `{{fileid}}`: Unique file ID
+- `{{preview}}`: Shows 📷 if file has a preview available, empty otherwise
+
 ```nextcloud
 command: List Files
 folder: /Books
-format: 📘 {{filename}}
+format: 📘 {{filename}} ({{sizemb}} MB) - Modified: {{date}}
 ```
 
 #### UI Customization
@@ -66,7 +139,9 @@ folder: /Notes
 list-style: none
 ```
 
-### Combined Example
+### Combined Examples
+
+Basic filtering with formatting:
 ```nextcloud
 command: List Files
 folder: /Documents
@@ -74,6 +149,30 @@ filter:
     - extension: pdf
 format: 📄 {{filename}}
 list-style: none
+```
+
+Advanced filtering with metadata:
+```nextcloud
+command: List Files
+folder: /Work
+filter:
+    - type: file
+    - favorite: true
+    - modifiedafter: 2024-12-01
+    - minsize: 1024
+format: {{favorite}} {{name}} - {{sizemb}} MB ({{date}}) by {{owner}}
+list-style: none
+```
+
+Show only images with previews and specific tags:
+```nextcloud
+command: List Files
+folder: /Gallery
+filter:
+    - mimetype: image/jpeg, image/png
+    - haspreview: true
+    - tag: vacation
+format: {{preview}} {{filename}} {{tags}}
 ```
 
 ## Developer API

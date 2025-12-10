@@ -127,6 +127,24 @@ export default class NextcloudPlugin extends Plugin {
 
         console.log('Fetching files from:', url);
 
+        const propfindBody = `<?xml version="1.0" encoding="UTF-8"?>
+<d:propfind xmlns:d="DAV:" xmlns:oc="http://owncloud.org/ns" xmlns:nc="http://nextcloud.org/ns">
+    <d:prop>
+        <d:displayname/>
+        <d:getlastmodified/>
+        <d:getcontentlength/>
+        <d:getcontenttype/>
+        <d:resourcetype/>
+        <d:creationdate/>
+        <oc:size/>
+        <oc:favorite/>
+        <oc:tags/>
+        <oc:owner-display-name/>
+        <oc:fileid/>
+        <nc:has-preview/>
+    </d:prop>
+</d:propfind>`;
+
         const response = await requestUrl({
             url: url,
             method: 'PROPFIND',
@@ -134,7 +152,8 @@ export default class NextcloudPlugin extends Plugin {
                 'Authorization': 'Basic ' + btoa(this.settings.username + ':' + this.settings.password),
                 'Depth': '1',
                 'Content-Type': 'application/xml'
-            }
+            },
+            body: propfindBody
         });
 
         if (response.status >= 200 && response.status < 300) {
@@ -146,9 +165,9 @@ export default class NextcloudPlugin extends Plugin {
 
             responses.forEach(resp => {
                 const href = resp.querySelector('href')?.textContent;
-                const displayName = resp.querySelector('propstat prop displayname')?.textContent;
-
-                if (!href) return;
+                const propstat = resp.querySelector('propstat prop');
+                
+                if (!href || !propstat) return;
 
                 const decodedHref = decodeURIComponent(href);
                 const cleanHref = decodedHref.endsWith('/') ? decodedHref.slice(0, -1) : decodedHref;
@@ -158,41 +177,174 @@ export default class NextcloudPlugin extends Plugin {
                     return;
                 }
 
+                // Extract all properties
+                const displayName = propstat.querySelector('displayname')?.textContent || '';
                 let name = displayName;
                 if (!name && href) {
                     const parts = href.split('/').filter(p => p);
                     name = parts[parts.length - 1];
                 }
+                if (!name) return;
 
-                if (name) {
-                    if (filters && filters.length > 0) {
-                        let match = true;
-                        for (const filter of filters) {
-                            if (filter.extension) {
-                                const ext = name.split('.').pop();
-                                const allowedExts = filter.extension.split(',').map((e: string) => e.trim().toLowerCase());
-                                if (!ext || !allowedExts.includes(ext.toLowerCase())) {
+                const lastModified = propstat.querySelector('getlastmodified')?.textContent || '';
+                const contentLength = propstat.querySelector('getcontentlength')?.textContent || '0';
+                const contentType = propstat.querySelector('getcontenttype')?.textContent || '';
+                const resourceType = propstat.querySelector('resourcetype collection') ? 'folder' : 'file';
+                const creationDate = propstat.querySelector('creationdate')?.textContent || '';
+                const size = propstat.querySelector('size')?.textContent || contentLength;
+                const favorite = propstat.querySelector('favorite')?.textContent === '1';
+                const tagsElements = propstat.querySelectorAll('tags tag');
+                const tags: string[] = [];
+                tagsElements.forEach(tag => {
+                    const tagText = tag.textContent;
+                    if (tagText) tags.push(tagText);
+                });
+                const owner = propstat.querySelector('owner-display-name')?.textContent || '';
+                const fileId = propstat.querySelector('fileid')?.textContent || '';
+                const hasPreview = propstat.querySelector('has-preview')?.textContent === 'true';
+
+                // Apply filters
+                if (filters && filters.length > 0) {
+                    let match = true;
+                    for (const filter of filters) {
+                        // Extension filter
+                        if (filter.extension) {
+                            const ext = name.split('.').pop();
+                            const allowedExts = filter.extension.split(',').map((e: string) => e.trim().toLowerCase());
+                            if (!ext || !allowedExts.includes(ext.toLowerCase())) {
+                                match = false;
+                                break;
+                            }
+                        }
+
+                        // Type filter (file or folder)
+                        if (filter.type) {
+                            const filterType = filter.type.toLowerCase();
+                            if (filterType !== resourceType) {
+                                match = false;
+                                break;
+                            }
+                        }
+
+                        // Size filters (min/max in bytes)
+                        if (filter.minsize) {
+                            const minSize = parseInt(filter.minsize);
+                            if (parseInt(size) < minSize) {
+                                match = false;
+                                break;
+                            }
+                        }
+                        if (filter.maxsize) {
+                            const maxSize = parseInt(filter.maxsize);
+                            if (parseInt(size) > maxSize) {
+                                match = false;
+                                break;
+                            }
+                        }
+
+                        // Favorite filter
+                        if (filter.favorite !== undefined) {
+                            const filterFavorite = filter.favorite === '1' || filter.favorite === 'true';
+                            if (favorite !== filterFavorite) {
+                                match = false;
+                                break;
+                            }
+                        }
+
+                        // MIME type filter
+                        if (filter.mimetype) {
+                            const filterMimes = filter.mimetype.split(',').map((m: string) => m.trim().toLowerCase());
+                            if (!filterMimes.includes(contentType.toLowerCase())) {
+                                match = false;
+                                break;
+                            }
+                        }
+
+                        // Tag filter
+                        if (filter.tag) {
+                            const filterTags = filter.tag.split(',').map((t: string) => t.trim().toLowerCase());
+                            const hasMatchingTag = filterTags.some((ft: string) => 
+                                tags.some((t: string) => t.toLowerCase().includes(ft))
+                            );
+                            if (!hasMatchingTag) {
+                                match = false;
+                                break;
+                            }
+                        }
+
+                        // Owner filter
+                        if (filter.owner) {
+                            if (!owner.toLowerCase().includes(filter.owner.toLowerCase())) {
+                                match = false;
+                                break;
+                            }
+                        }
+
+                        // Date filters
+                        if (filter.modifiedafter || filter.modifiedbefore) {
+                            const fileDate = new Date(lastModified);
+                            
+                            if (filter.modifiedafter) {
+                                const afterDate = new Date(filter.modifiedafter);
+                                if (fileDate <= afterDate) {
+                                    match = false;
+                                    break;
+                                }
+                            }
+                            
+                            if (filter.modifiedbefore) {
+                                const beforeDate = new Date(filter.modifiedbefore);
+                                if (fileDate >= beforeDate) {
                                     match = false;
                                     break;
                                 }
                             }
                         }
-                        if (!match) return;
+
+                        // Has preview filter
+                        if (filter.haspreview !== undefined) {
+                            const filterPreview = filter.haspreview === '1' || filter.haspreview === 'true';
+                            if (hasPreview !== filterPreview) {
+                                match = false;
+                                break;
+                            }
+                        }
                     }
+                    if (!match) return;
+                }
 
-                    if (format) {
-                        const ext = name.includes('.') ? name.split('.').pop() || '' : '';
-                        const filename = name.includes('.') ? name.substring(0, name.lastIndexOf('.')) : name;
+                // Format output
+                if (format) {
+                    const ext = name.includes('.') ? name.split('.').pop() || '' : '';
+                    const filename = name.includes('.') ? name.substring(0, name.lastIndexOf('.')) : name;
+                    const sizeKB = (parseInt(size) / 1024).toFixed(2);
+                    const sizeMB = (parseInt(size) / (1024 * 1024)).toFixed(2);
+                    const dateObj = lastModified ? new Date(lastModified) : null;
+                    const dateFormatted = dateObj ? dateObj.toLocaleDateString() : '';
+                    const dateTimeFormatted = dateObj ? dateObj.toLocaleString() : '';
+                    
+                    let formatted = format
+                        .replace(/{{name}}/g, name)
+                        .replace(/{{filename}}/g, filename)
+                        .replace(/{{ext}}/g, ext)
+                        .replace(/{{size}}/g, size)
+                        .replace(/{{sizekb}}/g, sizeKB)
+                        .replace(/{{sizemb}}/g, sizeMB)
+                        .replace(/{{type}}/g, resourceType)
+                        .replace(/{{mimetype}}/g, contentType)
+                        .replace(/{{date}}/g, dateFormatted)
+                        .replace(/{{datetime}}/g, dateTimeFormatted)
+                        .replace(/{{modified}}/g, lastModified)
+                        .replace(/{{created}}/g, creationDate)
+                        .replace(/{{favorite}}/g, favorite ? '⭐' : '')
+                        .replace(/{{tags}}/g, tags.join(', '))
+                        .replace(/{{owner}}/g, owner)
+                        .replace(/{{fileid}}/g, fileId)
+                        .replace(/{{preview}}/g, hasPreview ? '📷' : '');
 
-                        let formatted = format
-                            .replace(/{{name}}/g, name)
-                            .replace(/{{filename}}/g, filename)
-                            .replace(/{{ext}}/g, ext);
-
-                        results.push(formatted);
-                    } else {
-                        results.push(name);
-                    }
+                    results.push(formatted);
+                } else {
+                    results.push(name);
                 }
             });
 
