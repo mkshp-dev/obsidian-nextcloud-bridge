@@ -30,10 +30,12 @@ For security, it is highly recommended to use an **App Password** instead of you
 Use the `nextcloud` code block to list files from a specific folder.
 
 ### Basic Example
+````
 ```nextcloud
 command: List Files
 folder: Documents/ProjectX
 ```
+````
 
 ### Advanced Features
 
