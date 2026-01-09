@@ -179,7 +179,7 @@ export default class NextcloudPlugin extends Plugin {
         const encodedFolder = cleanFolder.split('/').map(encodeURIComponent).join('/');
         const url = baseUrl + encodedFolder;
 
-        console.log('Fetching files from:', url);
+        // console.log('Fetching files from:', url);
 
         const propfindBody = `<?xml version="1.0" encoding="UTF-8"?>
 <d:propfind xmlns:d="DAV:" xmlns:oc="http://owncloud.org/ns" xmlns:nc="http://nextcloud.org/ns">

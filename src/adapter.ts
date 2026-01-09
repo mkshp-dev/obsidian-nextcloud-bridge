@@ -27,11 +27,11 @@ export const obsidianFetch = async (input: RequestInfo | URL, init?: RequestInit
         throw: false
     };
 
-    console.log('ObsidianFetch Request:', method, url, headers);
+    // console.log('ObsidianFetch Request:', method, url, headers);
 
     try {
         const response = await requestUrl(req);
-        console.log('ObsidianFetch Response:', response.status, response.headers);
+        // console.log('ObsidianFetch Response:', response.status, response.headers);
 
         // Convert headers to standard Headers object
         const responseHeaders = new Headers(response.headers);

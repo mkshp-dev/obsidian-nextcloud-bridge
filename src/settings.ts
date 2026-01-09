@@ -73,7 +73,7 @@ export class NextcloudSettingsTab extends PluginSettingTab {
                     button.setButtonText('Testing...');
                     button.setDisabled(true);
                     try {
-                        console.log('Testing connection to:', this.plugin.settings.nextcloudUrl);
+                        // console.log('Testing connection to:', this.plugin.settings.nextcloudUrl);
 
                         // Try direct requestUrl to bypass CORS
                         const response = await requestUrl({
@@ -85,7 +85,7 @@ export class NextcloudSettingsTab extends PluginSettingTab {
                             }
                         });
 
-                        console.log('Test Response:', response.status);
+                        // console.log('Test Response:', response.status);
 
                         if (response.status >= 200 && response.status < 300) {
                             new Notice('Connection successful!');
