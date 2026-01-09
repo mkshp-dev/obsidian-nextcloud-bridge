@@ -2,6 +2,7 @@
 
 Connects your Obsidian vault to your Nextcloud instance via WebDAV, allowing you to list and view files directly within your notes.
 
+
 ## Setup Guide
 
 ### 1. Nextcloud Configuration (App Password)
@@ -247,7 +248,14 @@ if (plugin && plugin.api) {
     }
 }
 ```
+## Network Usage Disclosure
 
+**This plugin connects to external network services:**
+- **Service**: Your personal Nextcloud instance (user-configured)
+- **Purpose**: Fetches file listings and metadata from your Nextcloud server via WebDAV protocol
+- **Data sent**: Authentication credentials (username/password), folder paths, and WebDAV requests
+- **Data received**: File names, metadata, and folder contents from your Nextcloud instance
+- **Privacy**: All connections are made directly to your own Nextcloud server. No data is sent to third parties or the plugin developer.
 
 ## Support
 If this project helps your workflow, consider supporting its development ☕

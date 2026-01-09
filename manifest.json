@@ -1,10 +1,11 @@
 {
-    "id": "obsidian-nextcloud-bridge",
+    "id": "nextcloud-bridge",
     "name": "Nextcloud Bridge",
     "version": "1.3.0",
-    "minAppVersion": "0.15.0",
-    "description": "Connects to Nextcloud via WebDAV.",
+    "minAppVersion": "1.0.0",
+    "description": "Connects to Nextcloud via WebDAV to browse and insert links to your files.",
     "author": "mkshp",
     "authorUrl": "https://github.com/mkshp-dev",
-    "isDesktopOnly": false
+    "isDesktopOnly": false,
+    "fundingUrl": "https://buymeacoffee.com/mkshp"
 }
