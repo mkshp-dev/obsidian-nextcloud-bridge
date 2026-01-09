@@ -1,7 +1,7 @@
 import { requestUrl, RequestUrlParam } from 'obsidian';
 
 export const obsidianFetch = async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
-    const url = input.toString();
+    const url = typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url;
     const method = init?.method || 'GET';
     const headers: Record<string, string> = {};
 

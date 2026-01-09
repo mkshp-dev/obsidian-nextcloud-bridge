@@ -1,6 +1,4 @@
 import { App, PluginSettingTab, Setting, Notice, requestUrl } from 'obsidian';
-import { createClient } from 'webdav';
-import { obsidianFetch } from './adapter';
 import NextcloudPlugin from './main';
 
 export interface NextcloudPluginSettings {
@@ -28,7 +26,9 @@ export class NextcloudSettingsTab extends PluginSettingTab {
 
         containerEl.empty();
 
-        containerEl.createEl('h2', { text: 'Nextcloud Bridge Settings' });
+        new Setting(containerEl)
+            .setName('Nextcloud Bridge Settings')
+            .setHeading();
 
         new Setting(containerEl)
             .setName('Nextcloud URL')

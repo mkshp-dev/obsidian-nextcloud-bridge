@@ -1,4 +1,4 @@
-import { Plugin, MarkdownPostProcessorContext, requestUrl, Notice } from 'obsidian';
+import { Plugin, MarkdownPostProcessorContext, requestUrl } from 'obsidian';
 import { NextcloudPluginSettings, NextcloudSettingsTab, DEFAULT_SETTINGS } from './settings';
 
 export interface NextcloudBridgeAPI {
@@ -19,7 +19,7 @@ export default class NextcloudPlugin extends Plugin {
         this.addSettingTab(new NextcloudSettingsTab(this.app, this));
 
         this.registerMarkdownCodeBlockProcessor('nextcloud', (source, el, ctx) => {
-            this.processNextcloudBlock(source, el, ctx);
+            void this.processNextcloudBlock(source, el, ctx);
         });
     }
 
@@ -31,9 +31,9 @@ export default class NextcloudPlugin extends Plugin {
         await this.saveData(this.settings);
     }
 
-    parseQuery(source: string): { [key: string]: any } {
+    parseQuery(source: string): Record<string, unknown> {
         const lines = source.split('\n');
-        const params: { [key: string]: any } = {};
+        const params: Record<string, unknown> = {};
         let currentSection = '';
 
         lines.forEach(line => {
@@ -49,7 +49,7 @@ export default class NextcloudPlugin extends Plugin {
             if (currentSection === 'filter') {
                 const listMatch = trimmedLine.match(/^-\s*(\w+):\s*(.+)$/);
                 if (listMatch) {
-                    params['filter'].push({ [listMatch[1]]: listMatch[2].trim() });
+                    (params['filter'] as Array<Record<string, string>>).push({ [listMatch[1]]: listMatch[2].trim() });
                     return;
                 }
                 if (!line.startsWith(' ') && !line.startsWith('\t') && !trimmedLine.startsWith('-')) {
@@ -134,7 +134,11 @@ export default class NextcloudPlugin extends Plugin {
         if (params['command'] !== 'List Files') {
             throw new Error('Unknown command or missing parameters.');
         }
-        return await this.fetchFiles(params['folder'] || '/', params['filter'], params['format']);
+        return await this.fetchFiles(
+            params['folder'] as string || '/', 
+            params['filter'] as Array<Record<string, string>> | undefined, 
+            params['format'] as string
+        );
     }
 
     async processNextcloudBlock(source: string, el: HTMLElement, ctx: MarkdownPostProcessorContext) {
@@ -142,7 +146,11 @@ export default class NextcloudPlugin extends Plugin {
 
         if (params['command'] === 'List Files') {
             try {
-                const results = await this.fetchFiles(params['folder'] || '/', params['filter'], params['format']);
+                const results = await this.fetchFiles(
+                    params['folder'] as string || '/', 
+                    params['filter'] as Array<Record<string, string>> | undefined, 
+                    params['format'] as string
+                );
                 const ul = el.createEl('ul');
                 if (params['list-style'] === 'none') {
                     ul.addClass('nextcloud-no-bullets');
@@ -163,7 +171,7 @@ export default class NextcloudPlugin extends Plugin {
         }
     }
 
-    async fetchFiles(folder: string, filters: any[], format: string): Promise<string[]> {
+    async fetchFiles(folder: string, filters: Array<Record<string, string>> | undefined, format: string): Promise<string[]> {
         if (!this.settings.nextcloudUrl || !this.settings.username || !this.settings.password) {
             throw new Error('Please configure Nextcloud credentials in settings.');
         }
