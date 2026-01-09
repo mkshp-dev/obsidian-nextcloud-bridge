@@ -231,6 +231,21 @@ export default class NextcloudPlugin extends Plugin {
                     return;
                 }
 
+                // Extract filepath - get the path after the base WebDAV URL
+                let filepath = decodedHref;
+                // Try to extract relative path from the full href
+                const baseUrlPath = '/remote.php/dav/files/';
+                const baseIndex = filepath.indexOf(baseUrlPath);
+                if (baseIndex !== -1) {
+                    // Skip past /remote.php/dav/files/username/
+                    const afterBase = filepath.substring(baseIndex + baseUrlPath.length);
+                    const parts = afterBase.split('/');
+                    if (parts.length > 1) {
+                        // Remove username part and keep the rest
+                        filepath = '/' + parts.slice(1).join('/');
+                    }
+                }
+
                 // Extract all properties
                 const displayName = propstat.querySelector('displayname')?.textContent || '';
                 let name = displayName;
@@ -394,7 +409,8 @@ export default class NextcloudPlugin extends Plugin {
                         .replace(/{{tags}}/g, tags.join(', '))
                         .replace(/{{owner}}/g, owner)
                         .replace(/{{fileid}}/g, fileId)
-                        .replace(/{{preview}}/g, hasPreview ? '📷' : '');
+                        .replace(/{{preview}}/g, hasPreview ? '📷' : '')
+                        .replace(/{{path}}/g, filepath);
 
                     results.push(formatted);
                 } else {

@@ -32,7 +32,7 @@ Use the `nextcloud` code block to list files from a specific folder.
 ### Basic Example
 ```nextcloud
 command: List Files
-folder: /Documents/ProjectX
+folder: Documents/ProjectX
 ```
 
 ### Advanced Features
@@ -68,7 +68,7 @@ Filter files using various criteria:
 Filter by extension:
 ```nextcloud
 command: List Files
-folder: /Photos
+folder: Photos
 filter:
     - extension: jpg, png
 ```
@@ -76,7 +76,7 @@ filter:
 Filter by size and type:
 ```nextcloud
 command: List Files
-folder: /Documents
+folder: Documents
 filter:
     - type: file
     - minsize: 1000000
@@ -86,7 +86,7 @@ filter:
 Filter by date and favorite status:
 ```nextcloud
 command: List Files
-folder: /Projects
+folder: Projects
 filter:
     - favorite: true
     - modifiedafter: 2024-01-01
@@ -95,7 +95,7 @@ filter:
 Filter by date with time:
 ```nextcloud
 command: List Files
-folder: /Documents
+folder: Documents
 filter:
     - modifiedafter: 2024-12-10T09:00:00
     - modifiedbefore: 2024-12-10T17:00:00
@@ -104,7 +104,7 @@ filter:
 Filter by relative dates (files from last 10 days):
 ```nextcloud
 command: List Files
-folder: /Documents
+folder: Documents
 filter:
     - modifiedafter: now - 10 days
 ```
@@ -112,7 +112,7 @@ filter:
 Filter by recent files (last 2 hours):
 ```nextcloud
 command: List Files
-folder: /Work
+folder: Work
 filter:
     - modifiedafter: now - 2 hours
     - type: file
@@ -122,7 +122,7 @@ format: 🕐 {{name}} - {{datetime}}
 Filter using date arithmetic on absolute dates:
 ```nextcloud
 command: List Files
-folder: /Archive
+folder: Archive
 filter:
     - modifiedafter: 2025-10-10 - 10 days
     - modifiedbefore: 2025-10-10 + 5 days
@@ -131,7 +131,7 @@ filter:
 Filter by tags and MIME type:
 ```nextcloud
 command: List Files
-folder: /Media
+folder: Media
 filter:
     - tag: work, important
     - mimetype: image/jpeg, image/png
@@ -144,6 +144,7 @@ Customize how each file entry is displayed using placeholders.
 - `{{name}}`: Full filename (e.g., `image.jpg`)
 - `{{filename}}`: Filename without extension (e.g., `image`)
 - `{{ext}}`: File extension (e.g., `jpg`)
+- `{{path}}`: Full path to the file (e.g., `/Documents/Photos/image.jpg`)
 
 **File metadata:**
 - `{{size}}`: File size in bytes
@@ -167,7 +168,7 @@ Customize how each file entry is displayed using placeholders.
 
 ```nextcloud
 command: List Files
-folder: /Books
+folder: Books
 format: 📘 {{filename}} ({{sizemb}} MB) - Modified: {{date}}
 ```
 
@@ -175,7 +176,7 @@ format: 📘 {{filename}} ({{sizemb}} MB) - Modified: {{date}}
 Remove bullet points for a cleaner look.
 ```nextcloud
 command: List Files
-folder: /Notes
+folder: Notes
 list-style: none
 ```
 
@@ -184,7 +185,7 @@ list-style: none
 Basic filtering with formatting:
 ```nextcloud
 command: List Files
-folder: /Documents
+folder: Documents
 filter:
     - extension: pdf
 format: 📄 {{filename}}
@@ -194,7 +195,7 @@ list-style: none
 Advanced filtering with metadata:
 ```nextcloud
 command: List Files
-folder: /Work
+folder: Work
 filter:
     - type: file
     - favorite: true
@@ -207,7 +208,7 @@ list-style: none
 Show only images with previews and specific tags:
 ```nextcloud
 command: List Files
-folder: /Gallery
+folder: Gallery
 filter:
     - mimetype: image/jpeg, image/png
     - haspreview: true
@@ -232,7 +233,7 @@ if (plugin && plugin.api) {
     try {
         const results = await plugin.api.runQuery(`
             command: List Files
-            folder: /Photos
+            folder: Photos
             filter:
                 - extension: jpg
             format: {{filename}}
