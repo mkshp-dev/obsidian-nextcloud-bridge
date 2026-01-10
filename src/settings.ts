@@ -43,9 +43,9 @@ export class NextcloudSettingsTab extends PluginSettingTab {
 
         new Setting(containerEl)
             .setName('Username')
-            .setDesc('Your Nextcloud username')
+            .setDesc('Your nextcloud username')
             .addText(text => text
-                .setPlaceholder('username')
+                .setPlaceholder('Username')
                 .setValue(this.plugin.settings.username)
                 .onChange(async (value) => {
                     this.plugin.settings.username = value;
@@ -54,9 +54,9 @@ export class NextcloudSettingsTab extends PluginSettingTab {
 
         new Setting(containerEl)
             .setName('Password')
-            .setDesc('Your Nextcloud password or app password (recommended)')
+            .setDesc('Your nextcloud password or app password (recommended)')
             .addText(text => text
-                .setPlaceholder('password')
+                .setPlaceholder('Password')
                 .setValue(this.plugin.settings.password)
                 .onChange(async (value) => {
                     this.plugin.settings.password = value;
@@ -66,7 +66,7 @@ export class NextcloudSettingsTab extends PluginSettingTab {
 
         new Setting(containerEl)
             .setName('Test connection')
-            .setDesc('Verify your Nextcloud credentials')
+            .setDesc('Verify your nextcloud credentials')
             .addButton(button => button
                 .setButtonText('Test')
                 .onClick(async () => {
