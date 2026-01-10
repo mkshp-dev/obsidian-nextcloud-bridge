@@ -27,7 +27,7 @@ export class NextcloudSettingsTab extends PluginSettingTab {
         containerEl.empty();
 
         new Setting(containerEl)
-            .setName('Nextcloud Bridge Settings')
+            .setName('Connection')
             .setHeading();
 
         new Setting(containerEl)
@@ -54,7 +54,7 @@ export class NextcloudSettingsTab extends PluginSettingTab {
 
         new Setting(containerEl)
             .setName('Password')
-            .setDesc('Your Nextcloud password or App Password (recommended)')
+            .setDesc('Your Nextcloud password or app password (recommended)')
             .addText(text => text
                 .setPlaceholder('password')
                 .setValue(this.plugin.settings.password)
@@ -65,7 +65,7 @@ export class NextcloudSettingsTab extends PluginSettingTab {
                 .inputEl.type = 'password');
 
         new Setting(containerEl)
-            .setName('Test Connection')
+            .setName('Test connection')
             .setDesc('Verify your Nextcloud credentials')
             .addButton(button => button
                 .setButtonText('Test')
@@ -97,7 +97,7 @@ export class NextcloudSettingsTab extends PluginSettingTab {
                         console.error('Nextcloud Connection Error:', error);
                         let message = `Connection failed: ${error.message}`;
                         if (error.message === '401 Unauthorized') {
-                            message = 'Authentication failed. Check username and App Password.';
+                            message = 'Authentication failed. Check username and app password.';
                         } else if (error.message.includes('404')) {
                             message = 'URL not found. Check your Nextcloud URL.';
                         } else if (error.message.includes('Network Error') || error.message.includes('Failed to fetch')) {
