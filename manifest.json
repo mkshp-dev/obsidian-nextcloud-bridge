@@ -6,6 +6,6 @@
     "description": "Connects to Nextcloud via WebDAV to browse and insert links to your files.",
     "author": "mkshp",
     "authorUrl": "https://github.com/mkshp-dev",
-    "isDesktopOnly": false,
+    "isDesktopOnly": true,
     "fundingUrl": "https://buymeacoffee.com/mkshp"
 }
